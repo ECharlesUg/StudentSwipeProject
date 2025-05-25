@@ -1,0 +1,15 @@
+name: Deploy to Azure
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'StudentSwipeProjects'
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}

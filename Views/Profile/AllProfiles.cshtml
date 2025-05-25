@@ -1,0 +1,57 @@
+﻿@model List<StudentSwipe.Models.Profile>
+@{
+    ViewData["Title"] = "All Profiles";
+}
+
+<h2>All Profiles</h2>
+
+<form asp-action="AllProfiles" method="get">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Age</th>
+                <th>Interests</th>
+                <th>Study Preferences</th>
+                <th>Roommate Preferences</th>
+                <th>Profile Picture</th>
+                <th>Actions</th> <!-- New column -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var profile in Model)
+            {
+                <tr>
+                    <td>@profile.FullName</td>
+                    <td>@profile.Email</td>
+                    <td>@profile.Age</td>
+                    <td>@profile.Interests</td>
+                    <td>@profile.StudyPreferences</td>
+                    <td>@profile.RoommatePreferences</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(profile.ProfilePictureUrl))
+                        {
+                            <img src="@profile.ProfilePictureUrl" alt="Profile Picture" style="height: 50px;" />
+                        }
+                        else
+                        {
+                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Default Avatar" style="height: 50px;" />
+                        }
+                    </td>
+                    <td>
+                        <form asp-controller="Profile" asp-action="SendInvite" method="post" style="display:inline;">
+                            <input type="hidden" name="profileId" value="@profile.Id" />
+                            <button type="submit" class="btn btn-success btn-sm" title="Send Invite">&#10003;</button>
+                        </form>
+
+                        <form asp-controller="Profile" asp-action="RejectInvite" method="post" style="display:inline;">
+                            <input type="hidden" name="profileId" value="@profile.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" title="Reject Invite">&#10005;</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>

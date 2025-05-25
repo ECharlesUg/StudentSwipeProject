@@ -1,0 +1,141 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["ShowNav"] = false;
+}
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
+    <style>
+
+        .container {
+            background-color: #fff;
+            margin: 50px auto;
+            border-radius: 43px;
+            display: flex;
+            overflow: hidden;
+            flex: auto;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left-section,
+        .right-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left-section {
+            background: #fff;
+        }
+
+        .right-section {
+            background: linear-gradient(to right, #ff52fd, #9d3ff1, #6c30ff);
+            color: #fff;
+            text-align: center;
+        }
+
+        input {
+            background-color: #eee;
+            border: none;
+            padding: 10px 13px;
+            margin: 8px 0;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        button {
+            border-radius: 20px;
+            border: 1px solid #9d3ff1;
+            background-color: #9d3ff1;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+            button.ghost {
+                background-color: transparent;
+                border: 2px solid #fff;
+            }
+
+            button[type="submit"]:hover,
+            .btn-primary:hover {
+                background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
+            }
+
+    </style>
+</head>
+
+<div class="container">
+
+    <!-- Login Form -->
+    <div class="left-section">
+        <form asp-controller="Authentication" asp-action="Login" method="post">
+            <h1>Sign in</h1>
+            @if (TempData["LoginError"] != null)
+            {
+                <div style="color: red;">@TempData["LoginError"]</div>
+            }
+            @if (TempData["LoginSuccess"] != null)
+            {
+                <div style="color: green;">@TempData["LoginSuccess"]</div>
+            }
+
+            <!-- Hidden returnUrl input -->
+            <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+
+            <input type="email" name="Email" placeholder="Email" required />
+            <input type="password" name="Password" placeholder="Password" required />
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- Register Form  -->
+    <div class="right-section">
+        <h1>Hello, Friend!</h1>
+        <p>Don’t have an account yet? Register below!</p>
+
+        <form asp-controller="Authentication" asp-action="Register" method="post">
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <div id="passwordRequirements" style="margin-top: 10px;">
+                    <p>must include:</p>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li id="length" class="invalid">At least 6 characters</li>
+                        <li id="uppercase" class="invalid">At least 1 uppercase letter</li>
+                        <li id="lowercase" class="invalid">At least 1 lowercase letter</li>
+                        <li id="number" class="invalid">At least 1 number</li>
+                        <li id="special" class="invalid">At least 1 special character</li>
+                    </ul>
+                </div>
+                <input asp-for="Password" class="form-control" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

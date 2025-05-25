@@ -1,0 +1,174 @@
+﻿@model StudentSwipe.Models.Profile
+
+@{
+    var studyOptions = ViewBag.StudyOptions as List<string>;
+    var roommateOptions = ViewBag.RoommateOptions as List<string>;
+    var selectedStudy = Model.StudyPreferences?.Split(',') ?? Array.Empty<string>();
+    var selectedRoommate = Model.RoommatePreferences?.Split(',') ?? Array.Empty<string>();
+}
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
+
+
+<h2>@(Model.UserType == null ? "Create Profile" : "Edit Profile")</h2>
+
+<form asp-action="CreateOrEdit" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Interests"></label>
+        <input asp-for="Interests" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Age"></label>
+        <input asp-for="Age" class="form-control" type="number" />
+    </div>
+
+    <div class="form-group">
+        <label>Study Preferences</label><br />
+        @foreach (var option in studyOptions)
+        {
+            <label>
+                <input type="checkbox" name="selectedStudyPrefs" value="@option" @(selectedStudy.Contains(option) ? "checked" : "") /> @option
+            </label>
+            <br />
+        }
+    </div>
+
+    @if (Model.UserType == "University")
+    {
+        <div class="form-group">
+            <label>Roommate Preferences</label><br />
+            @foreach (var option in roommateOptions)
+            {
+                <label>
+                    <input type="checkbox" name="selectedRoommatePrefs" value="@option" @(selectedRoommate.Contains(option) ? "checked" : "") /> @option
+                </label>
+                <br />
+            }
+        </div>
+    }
+
+    <div class="form-group">
+        <label>Upload Profile Picture</label>
+        <input type="file" name="ProfilePicture" accept="image/*" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+    {
+        <div style="margin-bottom: 20px;">
+            <p>Current Picture:</p>
+            <img src="@Model.ProfilePictureUrl" alt="Profile Picture" style="max-width: 200px;" />
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Save Profile</button>
+</form>
+
+<style>
+/* Font & base */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: #f0e7ff; /* light lavender background */
+    margin: 30px 0;
+}
+
+h2 {
+    text-align: center;
+    color: #4a148c; /* deep purple */
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+/* Form container */
+form {
+    max-width: 700px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px 50px;
+    border-radius: 30px;
+    box-shadow: 0 12px 25px rgba(109, 35, 210, 0.25);
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 25px;
+}
+
+/* Labels */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #5e35b1; /* purple */
+}
+
+/* Inputs */
+input[type="text"],
+input[type="number"],
+input[type="file"],
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border-radius: 15px;
+    border: 1.5px solid #b39ddb;
+    background-color: #f6f1ff;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="file"]:focus,
+.form-control:focus {
+    border-color: #7e57c2;
+    background-color: #ede7f6;
+    outline: none;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+/* Checkbox labels inline */
+.form-group label input[type="checkbox"] {
+    display: inline;
+    margin-right: 10px;
+}
+
+/* Profile picture preview */
+img {
+    max-width: 200px;
+    border-radius: 20px;
+    margin-top: 12px;
+    box-shadow: 0 6px 12px rgba(125, 81, 255, 0.3);
+}
+
+/* Submit button */
+button[type="submit"],
+.btn-primary {
+    width: 100%;
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    background: linear-gradient(90deg, #6c30ff, #9d3ff1, #ff52fd);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.4s ease;
+    box-shadow: 0 6px 15px rgba(157, 63, 241, 0.6);
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
+    background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
+}
+
+</style>

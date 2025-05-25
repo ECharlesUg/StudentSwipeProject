@@ -1,0 +1,86 @@
+﻿<head>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
+    <style>
+
+        .container {
+            background-color: #fff;
+            margin: 50px auto;
+            border-radius: 43px;
+            display: flex;
+            overflow: hidden;
+            flex: auto;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left-section,
+        .right-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left-section {
+            background: #fff;
+        }
+
+        .right-section {
+            background: linear-gradient(to right, #ff52fd, #9d3ff1, #6c30ff);
+            color: #fff;
+            text-align: center;
+        }
+
+        input {
+            background-color: #eee;
+            border: none;
+            padding: 10px 13px;
+            margin: 8px 0;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        button {
+            border-radius: 20px;
+            border: 1px solid #9d3ff1;
+            background-color: #9d3ff1;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+            button.ghost {
+                background-color: transparent;
+                border: 2px solid #fff;
+            }
+
+            button[type="submit"]:hover,
+            .btn-primary:hover {
+                background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
+            }
+
+    </style>
+</head>
+
+<div class="container">
+
+    <!-- Login Form -->
+    <div class="left-section">
+        <form asp-controller="Authentication" asp-action="Login" method="post">
+            <h1>Sign Out</h1>
+
+            <!-- Hidden returnUrl input -->
+            <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+</div>
+
