@@ -1,57 +1,103 @@
 ﻿@model List<StudentSwipe.Models.Profile>
+
 @{
     ViewData["Title"] = "All Profiles";
+    ViewData["ShowNav"] = true;
 }
 
-<h2>All Profiles</h2>
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
 
-<form asp-action="AllProfiles" method="get">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Age</th>
-                <th>Interests</th>
-                <th>Study Preferences</th>
-                <th>Roommate Preferences</th>
-                <th>Profile Picture</th>
-                <th>Actions</th> <!-- New column -->
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var profile in Model)
-            {
-                <tr>
-                    <td>@profile.FullName</td>
-                    <td>@profile.Email</td>
-                    <td>@profile.Age</td>
-                    <td>@profile.Interests</td>
-                    <td>@profile.StudyPreferences</td>
-                    <td>@profile.RoommatePreferences</td>
-                    <td>
-                        @if (!string.IsNullOrEmpty(profile.ProfilePictureUrl))
+<h2 class="text-center mb-5" style="font-weight: 800; color: #6c30ff;">All Student Profiles</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info text-center">@TempData["Message"]</div>
+}
+
+<div class="row">
+    @foreach (var profile in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm rounded-lg border-0">
+                <div class="card-body text-center">
+                    <img src="@(string.IsNullOrEmpty(profile.ProfilePictureUrl)
+                        ? "https://bootdey.com/img/Content/avatar/avatar7.png"
+                        : profile.ProfilePictureUrl)"
+                         class="rounded-circle mb-3"
+                         style="width: 100px; height: 100px;"
+                         alt="Profile Picture" />
+
+                    <h5 class="card-title">@profile.FullName</h5>
+                    <p class="text-muted">@profile.UserType</p>
+
+                    <ul class="list-unstyled text-left" style="font-size: 14px;">
+                        <li><strong>Age:</strong> @profile.Age</li>
+                        <li><strong>Email:</strong> @profile.Email</li>
+                        <li><strong>Interests:</strong> @profile.Interests</li>
+                        <li><strong>Study Preferences:</strong> @profile.StudyPreferences</li>
+                        @if (profile.UserType == "University")
                         {
-                            <img src="@profile.ProfilePictureUrl" alt="Profile Picture" style="height: 50px;" />
+                            <li><strong>Roommate Preferences:</strong> @profile.RoommatePreferences</li>
                         }
-                        else
-                        {
-                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Default Avatar" style="height: 50px;" />
-                        }
-                    </td>
-                    <td>
+                    </ul>
+
+                    <div class="d-flex justify-content-around mt-3">
                         <form asp-controller="Profile" asp-action="SendInvite" method="post" style="display:inline;">
                             <input type="hidden" name="profileId" value="@profile.Id" />
-                            <button type="submit" class="btn btn-success btn-sm" title="Send Invite">&#10003;</button>
+                            <button type="submit" class="btn btn-success" title="Like">&#10003;</button>
                         </form>
 
                         <form asp-controller="Profile" asp-action="RejectInvite" method="post" style="display:inline;">
                             <input type="hidden" name="profileId" value="@profile.Id" />
-                            <button type="submit" class="btn btn-danger btn-sm" title="Reject Invite">&#10005;</button>
+                            <button type="submit" class="btn btn-danger" title="Reject">&#10005;</button>
                         </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    h2 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        color: #6c30ff;
+    }
+
+    .card {
+        background-color: #ffffff;
+        transition: transform 0.2s ease-in-out;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+    .btn {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        border-radius: 50%;
+        padding: 0;
+    }
+
+    .btn-success {
+        background-color: #4caf50;
+        border: none;
+    }
+
+    .btn-danger {
+        background-color: #f44336;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #43a047;
+    }
+
+    .btn-danger:hover {
+        background-color: #e53935;
+    }
+</style>

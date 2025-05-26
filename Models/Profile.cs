@@ -25,5 +25,9 @@ namespace StudentSwipe.Models
         public string Interests { get; set; }
 
         public string UserType { get; set; }  
+
+
+
+         
     }
 }

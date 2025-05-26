@@ -10,18 +10,26 @@ using System.IO;
 using System;
 using System.Linq;
 
+
 namespace StudentSwipe.Controllers
 {
+
+
     [Authorize]
     public class ProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public ProfileController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ProfileController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         public async Task<IActionResult> MyProfile()
         {
@@ -113,20 +121,42 @@ namespace StudentSwipe.Controllers
         [HttpGet]
         public async Task<IActionResult> AllProfiles()
         {
-            var profiles = await _context.Profiles.ToListAsync();
+            var user = await _userManager.GetUserAsync(User);
+            var profiles = await _context.Profiles
+                .Where(p => p.UserId != user.Id)
+                .ToListAsync();
+
             return View(profiles);
         }
-
         [HttpPost]
         public async Task<IActionResult> SendInvite(int profileId)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            // Logic to handle invite sending, e.g., save to DB, send notification, etc.
+            // Get the target profile
+            var targetProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == profileId);
+            if (targetProfile == null) return NotFound();
+
+            var existingLike = await _context.Likes
+                .FirstOrDefaultAsync(l => l.LikerId == user.Id && l.LikedId == targetProfile.UserId);
+
+            if (existingLike == null)
+            {
+                _context.Likes.Add(new Like
+                {
+                    LikerId = user.Id,
+                    LikedId = targetProfile.UserId, // ✅ now matching UserId correctly
+                    IsLiked = true
+                });
+                await _context.SaveChangesAsync();
+            }
+
             TempData["Message"] = "Invite sent!";
             return RedirectToAction("AllProfiles");
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> RejectInvite(int profileId)
@@ -134,10 +164,70 @@ namespace StudentSwipe.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            // Logic to handle invite rejection
+            // Get the profile you're rejecting
+            var targetProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == profileId);
+            if (targetProfile == null) return NotFound();
+
+            var existing = await _context.Likes
+                .FirstOrDefaultAsync(l => l.LikerId == user.Id && l.LikedId == targetProfile.UserId);
+
+            if (existing == null)
+            {
+                _context.Likes.Add(new Like
+                {
+                    LikerId = user.Id,
+                    LikedId = targetProfile.UserId,
+                    IsLiked = false
+                });
+                await _context.SaveChangesAsync();
+            }
+
             TempData["Message"] = "Invite rejected.";
             return RedirectToAction("AllProfiles");
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> MyLikes()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var likedProfileIds = await _context.Likes
+                .Where(l => l.LikerId == user.Id && l.IsLiked)
+                .Select(l => l.LikedId)
+                .ToListAsync();
+
+            var likedProfiles = await _context.Profiles
+                .Where(p => likedProfileIds.Contains(p.UserId))
+                .ToListAsync();
+
+            return View(likedProfiles);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Authentication");
+
+            var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (profile != null) _context.Profiles.Remove(profile);
+
+            var likes = _context.Likes.Where(l => l.LikerId == user.Id || l.LikedId == user.Id);
+            _context.Likes.RemoveRange(likes);
+
+            await _context.SaveChangesAsync();
+
+            await _userManager.DeleteAsync(user);
+            await _signInManager.SignOutAsync();
+
+            return RedirectToAction("Login", "Authentication");
+        }
+
+
+
 
     }
 }

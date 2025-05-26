@@ -1,5 +1,6 @@
 ﻿@model StudentSwipe.Models.Profile
 
+
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
 
 <section class="section about-section gray-bg" id="about">
@@ -47,6 +48,11 @@
                         </div>
                     </div>
                     <a asp-action="CreateOrEdit" class="edit-button">Edit Profile</a>
+
+
+                    <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('Are you sure you want to delete your account?');" style="margin-top: 20px;">
+                        <button type="submit" class="delete-button">Delete My Account</button>
+                    </form>
                 </div>
             </div>
             <div class="col-lg-6">
