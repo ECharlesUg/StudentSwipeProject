@@ -1,12 +1,13 @@
 ﻿@model List<StudentSwipe.Models.Profile>
 @{
     ViewData["Title"] = "My Likes";
-    ViewData["ShowNav"] = true;
+    ViewData["ShowNav"] = false;
 }
 
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
 
 <h2 class="text-center mb-5" style="font-weight: 800; color: #6c30ff;">Profiles You Liked</h2>
+
 
 @if (!Model.Any())
 {

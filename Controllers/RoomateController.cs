@@ -4,17 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentSwipe.Models;
 using StudentSwipe.Helpers;
-
 namespace StudentSwipe.Controllers
 {
+
+
     [Authorize]
-    public class ProfileController : Controller
+    public class RoomateController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public ProfileController(
+        public RoomateController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
@@ -23,17 +24,39 @@ namespace StudentSwipe.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+        public IActionResult RoomateMatch()
+        {
+            return View("Views/RoomMatch/RoomateMatch.cshtml"); 
+        }
+        public IActionResult RoomateRole()
+        {
+            return View("Views/RoomMatch/RoomateRole.cshtml");
+        }
+        public IActionResult RoomateProfile()
+        {
+            return View("Views/RoomMatch/ProfileCreationRoomate.cshtml");
+        }
+        public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+        {
+            string[] roles = { "WithHousing", "SeekingHousing" };
 
-        // Role Selection & Routing
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> SelectRole()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
-            return View();
+
+            return View(); // This view will show options: WithHousing / SeekingHousing
         }
 
-        // ProfileController.cs
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SelectRole(string selectedRole)
@@ -41,38 +64,16 @@ namespace StudentSwipe.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            // Add user to role (optional, if using ASP.NET Identity roles)
             if (selectedRole == "WithHousing" || selectedRole == "SeekingHousing")
             {
                 await _userManager.AddToRoleAsync(user, selectedRole);
-
-                // Update the user's profile UserType
-                var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-                if (profile != null)
-                {
-                    profile.UserType = selectedRole;
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    // If profile doesn't exist, create one
-                    _context.Profiles.Add(new Profile
-                    {
-                        UserId = user.Id,
-                        Email = user.Email,
-                        UserType = selectedRole
-                    });
-                    await _context.SaveChangesAsync();
-                }
-
-                return RedirectToAction("RoomateProfile", new { userType = selectedRole });
+                return RedirectToAction("CreateOrEdit");
             }
 
             ModelState.AddModelError("", "Invalid role selection.");
             return View();
         }
 
-        // StudyProfile
         public async Task<IActionResult> MyProfile()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -84,24 +85,22 @@ namespace StudentSwipe.Controllers
             return View(profile);
         }
 
+
         public async Task<IActionResult> CreateOrEdit()
         {
-           
-
-            
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            
-            ViewBag.StudyOptions = new List<string> { "Morning", "Afternoon", "Evening" };
 
-        var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-            ViewBag.UserType = profile.UserType;
+            var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
             return View(profile ?? new Profile
             {
                 UserType = EmailHelper.GetUserTypeFromEmail(user.Email)
             });
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -109,98 +108,18 @@ namespace StudentSwipe.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
-            
-            var existing = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-
-            profileModel.StudyPreferences = selectedStudyPrefs != null ? string.Join(",", selectedStudyPrefs) : "";
-
-            if (ProfilePicture != null && ProfilePicture.Length > 0)
-            {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProfilePicture.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", fileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await ProfilePicture.CopyToAsync(stream);
-                }
-
-                profileModel.ProfilePictureUrl = "/uploads/" + fileName;
-            }
-            else if (existing != null)
-            {
-                profileModel.ProfilePictureUrl = existing.ProfilePictureUrl;
-            }
-
-            if (existing != null)
-            {
-                existing.FullName = profileModel.FullName;
-                existing.Interests = profileModel.Interests;
-                existing.Age = profileModel.Age;
-                existing.Grade = profileModel.Grade;
-                existing.HSCourses = profileModel.HSCourses;
-                existing.UniCourses = profileModel.UniCourses;
-                existing.UniversityYear = profileModel.UniversityYear;
-                existing.StudyPreferences = profileModel.StudyPreferences;
-                existing.ProfilePictureUrl = profileModel.ProfilePictureUrl;
-            }
-            else
-            {
-                profileModel.UserId = user.Id;
-                profileModel.Email = user.Email;
-                profileModel.UserType = EmailHelper.GetUserTypeFromEmail(user.Email);
-                _context.Profiles.Add(profileModel);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("MyProfile");
-        }
-
-        //Roomate
-        public IActionResult RoommateMatch() => View("Views/RoomMatch/RoomateMatch.cshtml");
-        public IActionResult RoommateRole() => View("Views/RoomMatch/RoomateRole.cshtml");
-
-        public async Task<IActionResult> RoomateProfile(string userType)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
-
-            ViewBag.RoommateOptions = new List<string> { "Quiet", "Night Owl", "Smoker", "Non-Smoker" };
-            var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-
-            if (profile == null)
-            {
-                profile = new Profile
-                {
-                    UserId = user.Id,
-                    Email = user.Email,
-                    UserType = userType 
-                };
-            }
-            else if (!string.IsNullOrEmpty(userType))
-            {
-                profile.UserType = userType;
-                await _context.SaveChangesAsync();
-            }
-
-            return View(profile);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RoomateProfile(Profile profileModel, IFormFile ProfilePicture, [FromForm] string[] selectedStudyPrefs, [FromForm] string[] selectedRoommatePrefs)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
 
             var existing = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             profileModel.RoommatePreferences = selectedRoommatePrefs != null ? string.Join(",", selectedRoommatePrefs) : "";
-           
+
+
+
             if (ProfilePicture != null && ProfilePicture.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProfilePicture.FileName);
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", fileName);
+
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -208,10 +127,12 @@ namespace StudentSwipe.Controllers
                     await ProfilePicture.CopyToAsync(stream);
                 }
 
+
                 profileModel.ProfilePictureUrl = "/uploads/" + fileName;
             }
             else if (existing != null)
             {
+
                 profileModel.ProfilePictureUrl = existing.ProfilePictureUrl;
             }
 
@@ -231,14 +152,17 @@ namespace StudentSwipe.Controllers
             {
                 profileModel.UserId = user.Id;
                 profileModel.Email = user.Email;
-                profileModel.UserType = "SeekingHousing";
+                profileModel.UserType = EmailHelper.GetUserTypeFromEmail(user.Email);
+
                 _context.Profiles.Add(profileModel);
             }
 
+
             await _context.SaveChangesAsync();
+
+
             return RedirectToAction("MyProfile");
         }
-
 
         [HttpGet]
         public async Task<IActionResult> AllProfiles()
@@ -250,13 +174,13 @@ namespace StudentSwipe.Controllers
 
             return View(profiles);
         }
-
         [HttpPost]
         public async Task<IActionResult> SendInvite(int profileId)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
+            // Get the target profile
             var targetProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == profileId);
             if (targetProfile == null) return NotFound();
 
@@ -268,7 +192,7 @@ namespace StudentSwipe.Controllers
                 _context.Likes.Add(new Like
                 {
                     LikerId = user.Id,
-                    LikedId = targetProfile.UserId,
+                    LikedId = targetProfile.UserId, // ✅ now matching UserId correctly
                     IsLiked = true
                 });
                 await _context.SaveChangesAsync();
@@ -278,12 +202,15 @@ namespace StudentSwipe.Controllers
             return RedirectToAction("AllProfiles");
         }
 
+
+
         [HttpPost]
         public async Task<IActionResult> RejectInvite(int profileId)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
+            // Get the profile you're rejecting
             var targetProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == profileId);
             if (targetProfile == null) return NotFound();
 
@@ -305,6 +232,8 @@ namespace StudentSwipe.Controllers
             return RedirectToAction("AllProfiles");
         }
 
+
+
         [HttpGet]
         public async Task<IActionResult> MyLikes()
         {
@@ -321,46 +250,6 @@ namespace StudentSwipe.Controllers
             return View(likedProfiles);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> PendingInvites()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
-
-            var likers = await _context.Likes
-                .Where(l => l.LikedId == user.Id && l.IsLiked)
-                .Select(l => l.LikerId)
-                .ToListAsync();
-
-            var profiles = await _context.Profiles
-                .Where(p => likers.Contains(p.UserId))
-                .ToListAsync();
-
-            return View(profiles);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Matches()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
-
-            var iLiked = await _context.Likes
-                .Where(l => l.LikerId == user.Id && l.IsLiked)
-                .Select(l => l.LikedId)
-                .ToListAsync();
-
-            var mutualLikes = await _context.Likes
-                .Where(l => iLiked.Contains(l.LikerId) && l.LikedId == user.Id && l.IsLiked)
-                .Select(l => l.LikerId)
-                .ToListAsync();
-
-            var matchedProfiles = await _context.Profiles
-                .Where(p => mutualLikes.Contains(p.UserId))
-                .ToListAsync();
-
-            return View(matchedProfiles);
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -376,23 +265,15 @@ namespace StudentSwipe.Controllers
             _context.Likes.RemoveRange(likes);
 
             await _context.SaveChangesAsync();
+
             await _userManager.DeleteAsync(user);
             await _signInManager.SignOutAsync();
 
             return RedirectToAction("Login", "Authentication");
         }
 
-        // Optional: For initializing roles
-        public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
-        {
-            string[] roles = { "WithHousing", "SeekingHousing" };
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
-        }
+
+
+
     }
 }

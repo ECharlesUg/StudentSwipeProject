@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["ShowNav"] = false;
+}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="text-center">
+                    <span class="text-muted" style="color:#f6f1ff">RoomMatch</span>
+                    <h2 class="display-5 fw-bold">Welcome to RoomMatch!</h2>
+                    <p>
+                       You’re about to enter a space where you can explore multiple profiles of potential roommates. Whether you already have housing or are looking for a place, you can share your preferences, expectations, and details to find the perfect match.
+                       If you have housing, tell us about your home, rent, and how you want to split costs. If you’re looking for housing, share what you’re looking for in a roommate and your expectations.
+                       This is your chance to connect with others and find a comfortable living situation that suits your lifestyle!
+                    </p>
+                    <a class="profile-btn" asp-controller="Roomate" asp-action="RoomateRole">GetStarted</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    body{
+        background-color: #9d3ff1;
+    }
+    .profile-btn {
+        display: inline-block;
+        border-radius: 20px;
+        border: 1px solid #7e57c2;
+        background-color: #f6f1ff;
+        color: #6c30ff;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 12px 45px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s ease;
+    }
+
+        .profile-btn:hover {
+            background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
+        }
+
+</style>
