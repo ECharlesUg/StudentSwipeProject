@@ -46,12 +46,23 @@
                                     <a class="nav-link text-dark" asp-controller="Profile" asp-action="MyLikes">My Likes</a>
                                 </li>
 
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Profile" asp-action="PendingInvites">Pending Invites</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Profile" asp-action="Matches">Matches</a>
+                                </li>
+
+
+
                                 @if(ViewBag.UserType == "University")
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-controller="Roomate" asp-action="RoomateMatch">RoomMatch</a>
                                     </li>
                                 }
+
                             }
                         </ul>
                     </div>

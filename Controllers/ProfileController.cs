@@ -321,6 +321,47 @@ namespace StudentSwipe.Controllers
             return View(likedProfiles);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> PendingInvites()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var likers = await _context.Likes
+                .Where(l => l.LikedId == user.Id && l.IsLiked)
+                .Select(l => l.LikerId)
+                .ToListAsync();
+
+            var profiles = await _context.Profiles
+                .Where(p => likers.Contains(p.UserId))
+                .ToListAsync();
+
+            return View(profiles);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Matches()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var iLiked = await _context.Likes
+                .Where(l => l.LikerId == user.Id && l.IsLiked)
+                .Select(l => l.LikedId)
+                .ToListAsync();
+
+            var mutualLikes = await _context.Likes
+                .Where(l => iLiked.Contains(l.LikerId) && l.LikedId == user.Id && l.IsLiked)
+                .Select(l => l.LikerId)
+                .ToListAsync();
+
+            var matchedProfiles = await _context.Profiles
+                .Where(p => mutualLikes.Contains(p.UserId))
+                .ToListAsync();
+
+            return View(matchedProfiles);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccount()
