@@ -28,6 +28,12 @@ public class AuthenticationController : Controller
         return View("~/Views/Home/Login.cshtml");
     }
 
+    public IActionResult AboutUs()
+    {
+        return View("~/Views/Home/AboutUs.cshtml");
+    }
+
+
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromForm] RegisterViewModel model)
     {
@@ -84,7 +90,7 @@ public class AuthenticationController : Controller
             return Redirect(returnUrl);
         }
 
-        return RedirectToAction("MyProfile", "Profile");
+        return RedirectToAction("AboutUs");
     }
 
 
