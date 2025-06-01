@@ -9,9 +9,11 @@
 
 <h2 class="text-center mb-5" style="font-weight: 800; color: #6c30ff;">All Student Profiles</h2>
 
-@if (TempData["Message"] != null)
+@if (Model.Count == 0 && TempData["Message"] != null)
 {
-    <div class="alert alert-info text-center">@TempData["Message"]</div>
+    <div class="alert alert-warning text-center" style="font-size: 1.1rem;">
+        @TempData["Message"]
+    </div>
 }
 
 <div class="row">
@@ -21,11 +23,11 @@
             <div class="card shadow-sm rounded-lg border-0">
                 <div class="card-body text-center">
                     <img src="@(string.IsNullOrEmpty(profile.ProfilePictureUrl)
-                        ? "https://bootdey.com/img/Content/avatar/avatar7.png"
-                        : profile.ProfilePictureUrl)"
-                         class="rounded-circle mb-3"
-                         style="width: 100px; height: 100px;"
-                         alt="Profile Picture" />
+                                                 ? "https://bootdey.com/img/Content/avatar/avatar7.png"
+                                                 : profile.ProfilePictureUrl)"
+                     class="rounded-circle mb-3"
+                     style="width: 100px; height: 100px;"
+                     alt="Profile Picture" />
 
                     <h5 class="card-title">@profile.FullName</h5>
                     <p class="text-muted">@profile.UserType</p>
@@ -35,7 +37,7 @@
                         <li><strong>Email:</strong> @profile.Email</li>
                         <li><strong>Interests:</strong> @profile.Interests</li>
                         <li><strong>Study Preferences:</strong> @profile.StudyPreferences</li>
-                        @if (profile.UserType == "University")
+                    @if (profile.UserType == "University")
                         {
                             <li><strong>Roommate Preferences:</strong> @profile.RoommatePreferences</li>
                         }

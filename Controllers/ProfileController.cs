@@ -122,12 +122,26 @@ namespace StudentSwipe.Controllers
         public async Task<IActionResult> AllProfiles()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var currentUserProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (currentUserProfile == null) return RedirectToAction("CreateOrEdit");
+
             var profiles = await _context.Profiles
-                .Where(p => p.UserId != user.Id)
+                .Where(p => p.UserId != user.Id && p.UserType == currentUserProfile.UserType)
                 .ToListAsync();
+
+            if (!profiles.Any())
+            {
+                TempData["Message"] = $"No other {currentUserProfile.UserType?.ToLower()} profiles have been created yet.";
+            }
 
             return View(profiles);
         }
+
+
+
+
         [HttpPost]
         public async Task<IActionResult> SendInvite(int profileId)
         {
