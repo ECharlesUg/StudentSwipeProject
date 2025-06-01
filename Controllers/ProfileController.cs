@@ -362,6 +362,24 @@ namespace StudentSwipe.Controllers
             return View(matchedProfiles);
         }
 
+
+        public async Task<bool> IsMutualMatchAllowed(string userId1, string userId2)
+        {
+            var user1 = await _context.Users.FindAsync(userId1);
+            var user2 = await _context.Users.FindAsync(userId2);
+
+            var profile1 = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == userId1);
+            var profile2 = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == userId2);
+
+            bool isMutualLike = await _context.Likes.AnyAsync(l =>
+                l.LikerId == userId1 && l.LikedId == userId2 && l.IsLiked) &&
+                await _context.Likes.AnyAsync(l =>
+                l.LikerId == userId2 && l.LikedId == userId1 && l.IsLiked);
+
+            return isMutualLike && profile1.UserType == profile2.UserType;
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccount()

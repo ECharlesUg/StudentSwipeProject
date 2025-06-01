@@ -21,13 +21,23 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
+
+
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Ensures HTTPS
-    options.Cookie.SameSite = SameSiteMode.Strict;           // Better security
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+    options.Cookie.SameSite = SameSiteMode.Strict;         
 });
 
+
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
+
+app.MapHub<ChatHub>("/chathub");
+
 
 // Configure middleware  
 if (!app.Environment.IsDevelopment())
