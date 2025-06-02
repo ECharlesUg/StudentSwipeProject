@@ -1,13 +1,11 @@
 ﻿@model StudentSwipe.Models.Profile
 
 @{
+    
     var studyOptions = ViewBag.StudyOptions as List<string>;
-    var roommateOptions = ViewBag.RoommateOptions as List<string>;
     var selectedStudy = Model.StudyPreferences?.Split(',') ?? Array.Empty<string>();
-    var selectedRoommate = Model.RoommatePreferences?.Split(',') ?? Array.Empty<string>();
 }
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
-
 
 <h2>@(Model.UserType == null ? "Create Profile" : "Edit Profile")</h2>
 
@@ -18,7 +16,7 @@
     </div>
 }
 
-<form asp-action="CreateOrEdit" method="post" enctype="multipart/form-data">
+<form asp-action="CreateOrEdit" method="post" enctype="multipart/form-data" id="profileForm">
     <div class="form-group">
         <label asp-for="FullName"></label>
         <input asp-for="FullName" class="form-control" />
@@ -29,9 +27,28 @@
         <input asp-for="Interests" class="form-control" />
     </div>
 
+    <!-- Date of Birth Dropdowns -->
     <div class="form-group">
-        <label asp-for="Age"></label>
-        <input asp-for="Age" class="form-control" type="number" />
+        <label>Date of Birth</label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <select id="dobYear" class="form-control" required>
+                <option value="">Year</option>
+            </select>
+
+            <select id="dobMonth" class="form-control" required>
+                <option value="">Month</option>
+                @for (int i = 0; i < 12; i++)
+                {
+                    <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i + 1)</option>
+                }
+            </select>
+
+            <select id="dobDay" class="form-control" required>
+                <option value="">Day</option>
+            </select>
+        </div>
+        <small id="ageDisplay" style="display:block; margin-top:10px;">Age: </small>
+        <small id="ageError" style="color:red; display:none;">You must be at least 18 years old to continue.</small>
     </div>
 
     <div class="form-group">
@@ -40,22 +57,50 @@
         {
             <label>
                 <input type="checkbox" name="selectedStudyPrefs" value="@option" @(selectedStudy.Contains(option) ? "checked" : "") /> @option
-            </label>
-            <br />
+            </label><br />
         }
     </div>
-
     @if (Model.UserType == "University")
+{
+    <div class="form-group">
+            <label asp-for="UniversityYear">Select Your University Year</label>
+            <select asp-for="UniversityYear" class="form-control">
+                <option value="">-- Select Year --</option>
+                <option value="Year 1" selected="@(Model.UniversityYear == "Year 1")">Year 1</option>
+                <option value="Year 2" selected="@(Model.UniversityYear == "Year 2")">Year 2</option>
+                <option value="Year 3"  selected="@(Model.UniversityYear == "Year 3")">Year 3</option>
+                 <option value="Year 4"  selected="@(Model.UniversityYear == "Year 4")">Year 4</option>
+                  <option value="Year 5"  selected="@(Model.UniversityYear == "Year 5")">Year 5</option>
+            </select>
+        </div>
+
+          <div class="form-group">
+              <p>Format the courses by writing course name first and then its year level</p>
+              <span>eg. Chemistry Yr2</span>
+        <label asp-for="UniCourses">Enter Your Courses</label>
+        <input asp-for="UniCourses" class="form-control" />
+    </div>
+    }
+
+
+    @if(Model.UserType == "HighSchool")
     {
         <div class="form-group">
-            <label>Roommate Preferences</label><br />
-            @foreach (var option in roommateOptions)
-            {
-                <label>
-                    <input type="checkbox" name="selectedRoommatePrefs" value="@option" @(selectedRoommate.Contains(option) ? "checked" : "") /> @option
-                </label>
-                <br />
-            }
+            <label asp-for="Grade">Select Your Grade</label>
+            <select asp-for="Grade" class="form-control">
+                <option value="">-- Select Grade --</option>
+                <option value="9">Grade 9</option>
+                <option value="10">Grade 10</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
+            </select>
+        </div>
+
+       <div class="form-group">
+              <p>Format the courses by writing course name first and then its grade level</p>
+              <span>eg. Chemistry 10</span>
+        <label asp-for="HSCourses">Enter Your Courses</label>
+        <input asp-for="HSCourses" class="form-control" />
         </div>
     }
 
@@ -68,114 +113,199 @@
     {
         <div style="margin-bottom: 20px;">
             <p>Current Picture:</p>
-            <img src="@Model.ProfilePictureUrl" alt="Profile Picture" style="max-width: 200px;" />
+            <img src="@Model.ProfilePictureUrl" alt="Profile Picture" />
         </div>
     }
-
-    <button type="submit" class="btn btn-primary">Save Profile</button>
+ 
+ <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Save Profile</button>
+    
 </form>
 
 <style>
-/* Font & base */
-body {
-    font-family: 'Montserrat', sans-serif;
-    background: #f0e7ff; /* light lavender background */
-    margin: 30px 0;
-}
+    /* Font & base */
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background: #9d3ff1; /* light lavender background */
+        margin: 30px 0;
+    }
 
-h2 {
-    text-align: center;
-    color: #4a148c; /* deep purple */
-    font-weight: 800;
-    margin-bottom: 30px;
-}
+    h2 {
+        text-align: center;
+        color: #4a148c; /* deep purple */
+        font-weight: 800;
+        margin-bottom: 30px;
+    }
 
-/* Form container */
-form {
-    max-width: 700px;
-    margin: 0 auto;
-    background: white;
-    padding: 40px 50px;
-    border-radius: 30px;
-    box-shadow: 0 12px 25px rgba(109, 35, 210, 0.25);
-}
+    /* Form container */
+    form {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px 50px;
+        border-radius: 30px;
+        box-shadow: 0 12px 25px rgba(109, 35, 210, 0.25);
+    }
 
-/* Form groups */
-.form-group {
-    margin-bottom: 25px;
-}
+    /* Form groups */
+    .form-group {
+        margin-bottom: 25px;
+    }
 
-/* Labels */
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 700;
-    color: #5e35b1; /* purple */
-}
+    /* Labels */
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+        color: #5e35b1; /* purple */
+    }
+    
+    select.form-control {
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="purple" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 16px 16px;
+        padding-right: 40px;
+    }
 
-/* Inputs */
-input[type="text"],
-input[type="number"],
-input[type="file"],
-.form-control {
-    width: 100%;
-    padding: 12px 15px;
-    font-size: 16px;
-    border-radius: 15px;
-    border: 1.5px solid #b39ddb;
-    background-color: #f6f1ff;
-    transition: border-color 0.3s, background-color 0.3s;
-}
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="file"]:focus,
-.form-control:focus {
-    border-color: #7e57c2;
-    background-color: #ede7f6;
-    outline: none;
-}
+    /* Inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 16px;
+        border-radius: 15px;
+        border: 1.5px solid #b39ddb;
+        background-color: #f6f1ff;
+        transition: border-color 0.3s, background-color 0.3s;
+    }
 
-/* Checkboxes */
-input[type="checkbox"] {
-    transform: scale(1.2);
-    margin-right: 10px;
-    cursor: pointer;
-}
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="file"]:focus,
+        .form-control:focus {
+            border-color: #7e57c2;
+            background-color: #ede7f6;
+            outline: none;
+        }
 
-/* Checkbox labels inline */
-.form-group label input[type="checkbox"] {
-    display: inline;
-    margin-right: 10px;
-}
+    /* Checkboxes */
+    input[type="checkbox"] {
+        transform: scale(1.2);
+        margin-right: 10px;
+        cursor: pointer;
+    }
 
-/* Profile picture preview */
-img {
-    max-width: 200px;
-    border-radius: 20px;
-    margin-top: 12px;
-    box-shadow: 0 6px 12px rgba(125, 81, 255, 0.3);
-}
+    /* Checkbox labels inline */
+    .form-group label input[type="checkbox"] {
+        display: inline;
+        margin-right: 10px;
+    }
 
-/* Submit button */
-button[type="submit"],
-.btn-primary {
-    width: 100%;
-    padding: 15px 0;
-    font-size: 18px;
-    font-weight: 800;
-    color: white;
-    background: linear-gradient(90deg, #6c30ff, #9d3ff1, #ff52fd);
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: background 0.4s ease;
-    box-shadow: 0 6px 15px rgba(157, 63, 241, 0.6);
-}
+    /* Profile picture preview */
+    img {
+        max-width: 200px;
+        border-radius: 20px;
+        margin-top: 12px;
+        box-shadow: 0 6px 12px rgba(125, 81, 255, 0.3);
+    }
 
-button[type="submit"]:hover,
-.btn-primary:hover {
-    background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
-}
+    /* Submit button */
+    button[type="submit"],
+    .btn-primary {
+        width: 100%;
+        padding: 15px 0;
+        font-size: 18px;
+        font-weight: 800;
+        color: white;
+        background: linear-gradient(90deg, #6c30ff, #9d3ff1, #ff52fd);
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: background 0.4s ease;
+        box-shadow: 0 6px 15px rgba(157, 63, 241, 0.6);
+    }
+
+        button[type="submit"]:hover,
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
+        }
 
 </style>
+
+<script>
+    const dobYear = document.getElementById('dobYear');
+    const dobMonth = document.getElementById('dobMonth');
+    const dobDay = document.getElementById('dobDay');
+    const ageDisplay = document.getElementById('ageDisplay');
+    const ageError = document.getElementById('ageError');
+    const submitBtn = document.getElementById('submitBtn');
+
+
+    // Populate year dropdown
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= currentYear - 100; y--) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        dobYear.appendChild(option);
+    }
+
+    // Update day options
+    function updateDays() {
+        const year = parseInt(dobYear.value);
+        const month = parseInt(dobMonth.value);
+
+        if (!isNaN(year) && !isNaN(month)) {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            dobDay.innerHTML = '<option value="">Day</option>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const option = document.createElement('option');
+                option.value = d;
+                option.textContent = d;
+                dobDay.appendChild(option);
+            }
+        }
+    }
+    
+    // Calculate age
+    function calculateAge() {
+        const year = parseInt(dobYear.value);
+        const month = parseInt(dobMonth.value);
+        const day = parseInt(dobDay.value);
+        
+        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+            const birthDate = new Date(year, month, day);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+
+            ageDisplay.textContent = `Age: ${age}`;
+            Model.age = age; // Store age in the model for server-side validation
+            if (age < 18) {
+                ageError.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                ageError.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        } else {
+            ageDisplay.textContent = 'Age: ';
+            ageError.style.display = 'none';
+            submitBtn.disabled = true;
+        }
+    }
+
+    // Event listeners
+    dobYear.addEventListener('change', () => { updateDays(); calculateAge(); });
+    dobMonth.addEventListener('change', () => { updateDays(); calculateAge(); });
+    dobDay.addEventListener('change', calculateAge);
+</script>

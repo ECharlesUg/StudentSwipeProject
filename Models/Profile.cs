@@ -14,6 +14,11 @@ namespace StudentSwipe.Models
 
         public int Age { get; set; }
 
+        public int Grade { get; set; }
+        public string? UniversityYear { get; set; }
+        public string? HSCourses  { get; set; }
+        public string? UniCourses { get; set; }
+
         [Display(Name = "Study Preferences")]
         public string StudyPreferences { get; set; } 
 
@@ -24,10 +29,11 @@ namespace StudentSwipe.Models
 
         public string Interests { get; set; }
 
-        public string UserType { get; set; }  
-
-
-
-         
+        public string UserType { get; set; }
+        public string RoommateType { get; set; } // WithHousing or WithoutHousing
+        public string HousingDescription { get; set; }
+        public decimal? MonthlyRent { get; set; }
+        public string RentSplitPlan { get; set; }
+        public string Expectations { get; set; }
     }
 }

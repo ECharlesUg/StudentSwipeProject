@@ -43,7 +43,14 @@ builder.Services.AddTransient<IEmailSender>(sp =>
     );
 });
 
+
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
+
+app.MapHub<ChatHub>("/chathub");
+
 
 // Configure middleware  
 if (!app.Environment.IsDevelopment())
@@ -68,6 +75,8 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     context.Database.Migrate();
+
+
 
     if (!context.SchoolDomains.Any())
     {

@@ -1,0 +1,170 @@
+﻿@* @model StudentSwipe.Models.Profile
+
+@{
+    var roomateOptions = ViewBag.RoomateOptions as List<string>;
+    var selectedRoommate = Model.RoommatePreferences?.Split(',') ?? Array.Empty<string>();
+}
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
+
+<h2>@(Model.UserType == null ? "Create Profile" : "Edit Profile")</h2>
+
+<form asp-action="asp-action="RoomateProfile" method="post" enctype="multipart/form-data" id="profileForm">
+    
+    <div class="form-group">
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Interests"></label>
+        <input asp-for="Interests" class="form-control" />
+    </div>
+
+    <!-- Date of Birth Dropdowns -->
+    <div class="form-group">
+        <label>Date of Birth</label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <select id="dobYear" class="form-control" required>
+                <option value="">Year</option>
+            </select>
+
+            <select id="dobMonth" class="form-control" required>
+                <option value="">Month</option>
+                @for (int i = 0; i < 12; i++)
+                {
+                    <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i + 1)</option>
+                }
+            </select>
+
+            <select id="dobDay" class="form-control" required>
+                <option value="">Day</option>
+            </select>
+        </div>
+        <small id="ageDisplay" style="display:block; margin-top:10px;">Age: </small>
+        <small id="ageError" style="color:red; display:none;">You must be at least 18 years old to continue.</small>
+        <input type="hidden" name="Age" id="Age" value="" />
+    </div>
+
+    <div class="form-group">
+        <label>Upload Profile Picture</label>
+        <input type="file" name="ProfilePicture" accept="image/*" />
+    </div>
+
+    @if (Model.UserType == "WithHousing")
+    {
+        <div class="form-group">
+            <label>Roommate Preferences</label><br />
+            @foreach (var option in ViewBag.RoommateOptions as List<string>)
+            {
+                <label>
+                    <input type="checkbox" name="selectedRoommatePrefs" value="@option"
+                        @(Model.RoommatePreferences != null && Model.RoommatePreferences.Contains(option) ? "checked" : "") /> @option
+                </label>
+                <br />
+            }
+        </div>
+
+        <div class="form-group">
+            <label asp-for="HousingDescription"></label>
+            <textarea asp-for="HousingDescription" class="form-control"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="MonthlyRent"></label>
+            <input asp-for="MonthlyRent" type="number" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="RentSplitPlan"></label>
+            <textarea asp-for="RentSplitPlan" class="form-control"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Expectations"></label>
+            <textarea asp-for="Expectations" class="form-control"></textarea>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+    {
+        <div style="margin-bottom: 20px;">
+            <p>Current Picture:</p>
+            <img src="@Model.ProfilePictureUrl" alt="Profile Picture" />
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Save Profile</button>
+</form>
+
+<style>
+    /* (Same styling as you originally had — omitted here for brevity, but keep it in the file) */
+</style>
+
+<script>
+    const dobYear = document.getElementById('dobYear');
+    const dobMonth = document.getElementById('dobMonth');
+    const dobDay = document.getElementById('dobDay');
+    const ageDisplay = document.getElementById('ageDisplay');
+    const ageError = document.getElementById('ageError');
+    const submitBtn = document.getElementById('submitBtn');
+    const ageInput = document.getElementById("Age");
+
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= currentYear - 100; y--) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        dobYear.appendChild(option);
+    }
+
+    function updateDays() {
+        const year = parseInt(dobYear.value);
+        const month = parseInt(dobMonth.value);
+        if (!isNaN(year) && !isNaN(month)) {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            dobDay.innerHTML = '<option value="">Day</option>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const option = document.createElement('option');
+                option.value = d;
+                option.textContent = d;
+                dobDay.appendChild(option);
+            }
+        }
+    }
+
+    function calculateAge() {
+        const year = parseInt(dobYear.value);
+        const month = parseInt(dobMonth.value);
+        const day = parseInt(dobDay.value);
+
+        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+            const birthDate = new Date(year, month, day);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+            ageDisplay.textContent = `Age: ${age}`;
+            ageInput.value = age;
+
+            if (age < 18) {
+                ageError.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                ageError.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        } else {
+            ageDisplay.textContent = 'Age: ';
+            ageError.style.display = 'none';
+            submitBtn.disabled = true;
+        }
+    }
+
+    dobYear.addEventListener('change', () => { updateDays(); calculateAge(); });
+    dobMonth.addEventListener('change', () => { updateDays(); calculateAge(); });
+    dobDay.addEventListener('change', calculateAge);
+</script>
+ *@

@@ -1,8 +1,7 @@
 ﻿@model StudentSwipe.Models.Profile
 
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
-
-<section class="section about-section gray-bg" id="about">
+<section class="section purple-bg" id="about">
     <div class="container">
         <h2>My Profile</h2>
 
@@ -18,20 +17,60 @@
                 <div class="about-text go-to">
                     <h3 class="dark-color">@Model.FullName</h3>
                     <h6 class="theme-color lead">@Model.UserType</h6>
+        <div class="profile-wrapper" style="background-color: #fff; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; padding: 40px;">
+
+            <div class="col-lg-4" style="text-align: center; flex: 1;">
+                @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                {
+                    <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="profile-picture" />
+                }
+                else
+                {
+                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Default Avatar" class="profile-picture" />
+                }
+            </div>
+
+            <div class="col-lg-8" style="flex: 2;">
+                <div class="about-text">
+                    <h3 class="dark-color" style="color:black">@Model.FullName</h3>
+                    <h6 class="theme-color lead" style="color:#6c30ff">@Model.UserType</h6>
                     <div class="row about-list">
                         <div class="col-md-6">
-                            <div class="media">
+                        @*     <div class="media">
                                 <label>Age</label>
                                 <p>@Model.Age</p>
-                            </div>
-                            <div class="media">
-                                <label>User Type</label>
-                                <p>@Model.UserType</p>
-                            </div>
+                            </div> *@
                             <div class="media">
                                 <label>Study Preferences</label>
                                 <p>@Model.StudyPreferences</p>
                             </div>
+                            @if(Model.UserType == "University")
+                            {
+                                <div class="media">
+                                    <label>Courses</label>
+                                    <p>@Model.UniCourses</p>
+                                </div>
+
+                                    <div class="media">
+                                    <label>Uni Level</label>
+                                    <p>@Model.UniversityYear</p>
+                                </div>
+
+                            }
+                           
+                            @if(Model.UserType == "HighSchool")
+                            {
+                                <div class="media">
+                                    <label>Courses</label>
+                                    <p>@Model.HSCourses</p>
+                                </div>
+
+                                    <div class="media">
+                                    <label>Grade Level</label>
+                                    <p>@Model.Grade</p>
+                                </div>
+
+                            }
                         </div>
                         <div class="col-md-6">
                             <div class="media">
@@ -39,39 +78,23 @@
                                 <p>@Model.Interests</p>
                             </div>
                             <div class="media">
-                                <label>Email</label>
-                                <p>info@domain.com</p> <!-- You can bind to Model.Email if available -->
-                            </div>
-                            @if (Model.UserType == "University")
-                            {
-                                <div class="media">
-                                    <label>Roommate Prefs</label>
-                                    <p>@Model.RoommatePreferences</p>
-                                </div>
-                            }
-                            <div class="media">
                                 <label>Profile</label>
                                 <p>Active</p>
                             </div>
-                        </div>
+                        </div>q
                     </div>
-                    <a asp-action="CreateOrEdit" class="edit-button">Edit Profile</a>
+
+          
+                        <button type="submit" class="create-button" style="width: 100%;">
+                            <a asp-action="CreateOrEdit" >
+                            Edit My Profile
+                            </a>
+                        </button>
+                        
 
                     <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('Are you sure you want to delete your account?');" style="margin-top: 20px;">
                         <button type="submit" class="delete-button">Delete My Account</button>
                     </form>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="about-avatar">
-                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
-                    {
-                        <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="profile-picture" />
-                    }
-                    else
-                    {
-                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Default Avatar" />
-                    }
                 </div>
             </div>
         </div>
@@ -180,12 +203,109 @@
         padding: 15px 0;
         font-size: 18px;
         font-weight: 800;
+        font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        background-color: #6c30ff;
         color: #fff;
-        background: linear-gradient(90deg,#9d3ff1, #ff52fd, #6c30ff);
-        border: 2px solid black;
+    }
+
+    .purple-bg {
+        background-color: #6c30ff;
+        padding: 80px 0;
+    }
+
+    .profile-card {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+ 
+        color: #333;
+    }
+
+    .profile-picture {
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: 60px;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .about-text h3 {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .about-text h6 {
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .about-list {
+        margin-top: 20px;
+    }
+
+        .about-list .media {
+            margin-bottom: 12px;
+        }
+
+        .about-list label {
+            font-weight: 600;
+            width: 130px;
+            color: #20247b;
+            margin: 0;
+        }
+
+            .about-list label:after {
+                display: none;
+            }
+
+        .about-list p {
+            margin: 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+    .create-button {
+        padding: 12px 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
+        border: none;
         border-radius: 30px;
         cursor: pointer;
-        transition: background 0.4s ease;
         box-shadow: 0 6px 15px rgba(157, 63, 241, 0.6);
+        margin-top: 20px;
+        transition: background 0.3s ease;
     }
+    .create-button:hover{
+        background: linear-gradient(90deg, #6c30ff, #ff52fd,  #9d3ff1);
+    }
+
+    .row-align-items-center-flex-row-reverse{
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-button {
+        width: 100%;
+        padding: 12px 0;
+        font-size: 16px;
+        font-weight: 600;
+        background-color: #ff4d4d;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        box-shadow: 0 6px 15px rgba(255, 77, 77, 0.6);
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .delete-button:hover {
+            background-color: #e60000;
+        }
 </style>

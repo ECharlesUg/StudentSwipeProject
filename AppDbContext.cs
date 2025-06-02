@@ -13,4 +13,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<Like> Likes { get; set; }
 
+    public DbSet<ChatMessage> ChatMessages { get; set; }
+
+
+
+
 }

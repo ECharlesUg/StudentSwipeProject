@@ -1,19 +1,18 @@
 ﻿@model List<StudentSwipe.Models.Profile>
 @{
-    ViewData["Title"] = "My Likes";
-    ViewData["ShowNav"] = false;
+    ViewData["Title"] = "Matches";
+    ViewData["ShowNav"] = true;
 }
 
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
 
-<h2 class="text-center mb-5" style="font-weight: 800; color: #6c30ff;">Profiles You Liked</h2>
-
+<h2 class="text-center mb-5" style="font-weight: 800; color: #6c30ff;">Your Matches</h2>
 
 @if (!Model.Any())
 {
     <div class="text-center">
-        <p style="font-size: 18px;">You haven’t liked anyone yet </p>
-        <a href="/Profile/AllProfiles" class="btn btn-primary mt-3">Browse All Profiles</a>
+        <p style="font-size: 18px;">No matches yet 😕</p>
+        <a href="/Profile/AllProfiles" class="btn btn-primary mt-3">Find People</a>
     </div>
 }
 else
@@ -24,15 +23,18 @@ else
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm rounded-lg border-0">
                     <div class="card-body text-center">
-                        <img src="@(string.IsNullOrEmpty(profile.ProfilePictureUrl) ? "https://bootdey.com/img/Content/avatar/avatar7.png" : profile.ProfilePictureUrl)"
-                             class="rounded-circle mb-3" style="width: 100px; height: 100px;" alt="Profile Picture" />
+                        <img src="@(string.IsNullOrEmpty(profile.ProfilePictureUrl)
+                            ? "https://bootdey.com/img/Content/avatar/avatar7.png"
+                            : profile.ProfilePictureUrl)"
+                             class="rounded-circle mb-3"
+                             style="width: 100px; height: 100px;"
+                             alt="Profile Picture" />
 
                         <h5 class="card-title">@profile.FullName</h5>
                         <p class="text-muted">@profile.UserType</p>
 
                         <ul class="list-unstyled text-left" style="font-size: 14px;">
                             <li><strong>Age:</strong> @profile.Age</li>
-                            <li><strong>Email:</strong> @profile.Email</li>
                             <li><strong>Interests:</strong> @profile.Interests</li>
                             <li><strong>Study Preferences:</strong> @profile.StudyPreferences</li>
                             @if (profile.UserType == "University")
@@ -40,25 +42,17 @@ else
                                 <li><strong>Roommate Preferences:</strong> @profile.RoommatePreferences</li>
                             }
                         </ul>
+
+                        <a asp-controller="Chat"
+                           asp-action="StartChat"
+                           asp-route-receiverId="@profile.UserId"
+                           asp-route-context="@(profile.UserType == "University" ? "Roommate" : "Study")"
+                           class="btn btn-outline-primary mt-2">
+                            💬 Chat
+                        </a>
                     </div>
                 </div>
             </div>
         }
     </div>
 }
-
-<style>
-    h2 {
-        font-family: 'Montserrat', sans-serif;
-        font-weight: 800;
-        color: #6c30ff;
-    }
-
-    .card {
-        transition: transform 0.2s ease-in-out;
-    }
-
-        .card:hover {
-            transform: scale(1.02);
-        }
-</style>

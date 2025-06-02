@@ -5,7 +5,7 @@
         return new List<SchoolDomain>
         {
             new SchoolDomain { Domain = ".uwinnipeg.ca", SchoolName = "University of Winnipeg", SchoolType = "University" },
-            new SchoolDomain { Domain = "umanitoba.ca", SchoolName = "University of Manitoba", SchoolType = "University" },
+            new SchoolDomain { Domain = "myumanitoba.ca", SchoolName = "University of Manitoba", SchoolType = "University" },
             new SchoolDomain { Domain = "live.wsd1.org", SchoolName = "Winnipeg School Division", SchoolType = "HighSchool" },
             new SchoolDomain { Domain = "lrsd.net", SchoolName = "Louis Riel School Division", SchoolType = "HighSchool" },
             new SchoolDomain { Domain = "smail.pembinatrails.ca", SchoolName = "Pembina Trails School Division", SchoolType = "HighSchool" },
