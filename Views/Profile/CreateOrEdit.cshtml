@@ -289,7 +289,7 @@
 
 
             ageDisplay.textContent = `Age: ${age}`;
-            Model.age = age; // Store age in the model for server-side validation
+          
             if (age < 18) {
                 ageError.style.display = 'block';
                 submitBtn.disabled = true;
