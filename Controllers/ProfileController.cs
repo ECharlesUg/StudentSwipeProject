@@ -96,7 +96,7 @@ namespace StudentSwipe.Controllers
             ViewBag.StudyOptions = new List<string> { "Morning", "Afternoon", "Evening" };
 
         var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-            ViewBag.UserType = profile.UserType;
+            
             return View(profile ?? new Profile
             {
                 UserType = EmailHelper.GetUserTypeFromEmail(user.Email)
@@ -156,7 +156,7 @@ namespace StudentSwipe.Controllers
             return RedirectToAction("MyProfile");
         }
 
-        //Roomate
+        /*//Roomate
         public IActionResult RoommateMatch() => View("Views/RoomMatch/RoomateMatch.cshtml");
         public IActionResult RoommateRole() => View("Views/RoomMatch/RoomateRole.cshtml");
 
@@ -237,7 +237,7 @@ namespace StudentSwipe.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction("MyProfile");
-        }
+        }*/
 
 
         [HttpGet]

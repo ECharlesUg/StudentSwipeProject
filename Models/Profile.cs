@@ -30,10 +30,10 @@ namespace StudentSwipe.Models
         public string Interests { get; set; }
 
         public string UserType { get; set; }
-        public string RoommateType { get; set; } // WithHousing or WithoutHousing
+        public string? RoommateType { get; set; } // WithHousing or WithoutHousing
         public string HousingDescription { get; set; }
         public decimal? MonthlyRent { get; set; }
-        public string RentSplitPlan { get; set; }
-        public string Expectations { get; set; }
+        public string? RentSplitPlan { get; set; }
+        public string? Expectations { get; set; }
     }
 }
