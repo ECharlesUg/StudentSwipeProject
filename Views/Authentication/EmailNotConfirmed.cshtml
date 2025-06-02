@@ -1,0 +1,13 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Email Not Confirmed";
+}
+
+<h2>Email Not Confirmed</h2>
+
+<p>Your email (@Model) is not confirmed yet.</p>
+<form asp-action="ResendVerificationEmail" method="post">
+    <input type="hidden" name="email" value="@Model" />
+    <button type="submit">Send Verification Email</button>
+</form>

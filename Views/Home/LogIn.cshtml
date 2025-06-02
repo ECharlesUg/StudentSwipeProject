@@ -70,8 +70,41 @@
                 background: linear-gradient(90deg, #9d3ff1, #ff52fd, #6c30ff);
             }
 
+        .alert {
+            padding: 12px 20px;
+            margin: 15px auto;
+            border-radius: 8px;
+            font-weight: bold;
+            width: 80%;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
     </style>
 </head>
+
+<!-- Message Alerts -->
+@if (TempData["RegisterMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["RegisterMessage"]</div>
+}
+
+@if (TempData["LoginError"] != null)
+{
+    <div class="alert alert-danger">@TempData["LoginError"]</div>
+}
+
+<!-- Removed the LoginSuccess alert here -->
 
 <div class="container">
 
@@ -79,14 +112,6 @@
     <div class="left-section">
         <form asp-controller="Authentication" asp-action="Login" method="post">
             <h1>Sign in</h1>
-            @if (TempData["LoginError"] != null)
-            {
-                <div style="color: red;">@TempData["LoginError"]</div>
-            }
-            @if (TempData["LoginSuccess"] != null)
-            {
-                <div style="color: green;">@TempData["LoginSuccess"]</div>
-            }
 
             <!-- Hidden returnUrl input -->
             <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />

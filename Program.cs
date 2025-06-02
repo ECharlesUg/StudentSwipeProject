@@ -1,33 +1,46 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using StudentSwipe.Helpers;
 using StudentSwipe.Models;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container  
 builder.Services.AddControllersWithViews();
 
-// 1. Add database context  
+// Add database context  
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Add Identity  
+// Add Identity  
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
-
-
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
-    options.Cookie.SameSite = SameSiteMode.Strict;         
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
+
+// Bind EmailSettings from appsettings.json
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Register SmtpEmailSender with injected settings
+builder.Services.AddTransient<IEmailSender>(sp =>
+{
+    var emailSettings = sp.GetRequiredService<IOptions<EmailSettings>>().Value;
+    return new SmtpEmailSender(
+        emailSettings.Host,
+        emailSettings.Port,
+        emailSettings.Username,
+        emailSettings.Password,
+        emailSettings.FromEmail
+    );
 });
 
 
