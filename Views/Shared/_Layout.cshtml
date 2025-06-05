@@ -11,8 +11,8 @@
 <body>
     <header>
         @{
-            var showNav = ViewData["ShowNav"] as bool? ?? true;
-  
+            var showNav = ViewData["ShowNav"] as bool? ?? true;                                          
+            var userType = User.Claims.FirstOrDefault(c => c.Type == "UserType")?.Value;                              
         }
 
         @if (showNav)
@@ -53,15 +53,12 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Profile" asp-action="Matches">Matches</a>
                                 </li>
-
-
-
-                                
+                                @if (userType == "University")
+                                {
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-controller="Roomate" asp-action="RoomateMatch">RoomMatch</a>
+                                             <a class="nav-link text-dark" asp-controller="Roomate" asp-action="RoomateMatch">RoomMatch</a>
                                     </li>
-                                
-
+                                }                               
                             }
                         </ul>
                     </div>

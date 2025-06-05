@@ -2,8 +2,7 @@
 
 <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet" />
 <section class="section purple-bg" id="about">
-    <div class="container">
-        <h2>My Profile</h2>
+    <div class="container-fluid">
 
         @if (TempData["LoginSuccess"] != null)
         {
@@ -11,12 +10,6 @@
                 @TempData["LoginSuccess"]
             </div>
         }
-
-        <div class="row align-items-center flex-row-reverse">
-            <div class="col-lg-6">
-                <div class="about-text go-to">
-                    <h3 class="dark-color">@Model.FullName</h3>
-                    <h6 class="theme-color lead">@Model.UserType</h6>
         <div class="profile-wrapper" style="background-color: #fff; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; padding: 40px;">
 
             <div class="col-lg-4" style="text-align: center; flex: 1;">
@@ -77,7 +70,7 @@
                                 <label>Profile</label>
                                 <p>Active</p>
                             </div>
-                        </div>q
+                        </div>
                     </div>
 
           
@@ -99,7 +92,7 @@
 
 <style>
     body {
-        color: #fff;
+        background-color: #6c30ff;
         margin-top: 20px;
     }
 
