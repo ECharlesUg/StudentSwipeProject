@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudentSwipe.Models
 {
@@ -6,11 +7,18 @@ namespace StudentSwipe.Models
     {
         public int Id { get; set; }
 
+        [Required]
         public string SenderId { get; set; }
+
+        [Required]
         public string ReceiverId { get; set; }
+
+        [Required]
         public string Message { get; set; }
+
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        public string Context { get; set; } // "Study" or "Roommate"
+        [Required]
+        public string Context { get; set; }  // "Roommate" or "Study"
     }
 }

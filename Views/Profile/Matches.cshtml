@@ -48,11 +48,20 @@ else
                            asp-route-receiverId="@profile.UserId"
                            asp-route-context="@(profile.UserType == "University" ? "Roommate" : "Study")"
                            class="btn btn-outline-primary mt-2">
-                            💬 Chat
+                             Chat
                         </a>
                     </div>
                 </div>
             </div>
+
+            <a asp-controller="Chat"
+               asp-action="StartChat"
+               asp-route-receiverId="@profile.UserId"
+               asp-route-context="Study"
+               class="btn btn-outline-primary mt-2">
+                 Chat
+            </a>
+
         }
     </div>
 }
