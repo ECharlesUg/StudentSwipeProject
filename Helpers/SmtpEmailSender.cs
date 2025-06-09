@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace StudentSwipe.Helpers
+namespace StudentSwipe.Helpers   
 {
     public class SmtpEmailSender : IEmailSender
     {
