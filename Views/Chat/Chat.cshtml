@@ -1,7 +1,10 @@
 ﻿@model List<StudentSwipe.Models.ChatMessage>
+@using System.Security.Claims
+
 @{
     var receiver = ViewBag.Receiver as ApplicationUser;
     var context = ViewBag.Context as string;
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 }
 
 <h2 class="text-center" style="color: #6c30ff;">Chat with @receiver.UserName (@context)</h2>
@@ -9,7 +12,7 @@
 <div id="chatBox" class="chat-box">
     @foreach (var msg in Model)
     {
-        <div class="@(msg.SenderId == User.FindFirst("sub")?.Value ? "my-message" : "their-message")">
+        <div class="@(msg.SenderId == currentUserId ? "my-message" : "their-message")">
             <p>@msg.Message</p>
         </div>
     }
@@ -31,6 +34,7 @@
             newMsg.className = "their-message";
             newMsg.innerHTML = `<p>${message}</p>`;
             chatBox.appendChild(newMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
 
         connection.start();
@@ -38,13 +42,12 @@
         document.getElementById("chatForm").addEventListener("submit", async e => {
             e.preventDefault();
             const input = document.getElementById("messageInput");
-            const message = input.value;
+            const message = input.value.trim();
+            if (!message) return;
 
             await fetch('/Chat/SendMessage', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `receiverId=@receiver.Id&message=${encodeURIComponent(message)}&context=${context}`
             });
 
@@ -53,7 +56,7 @@
             myMsg.className = "my-message";
             myMsg.innerHTML = `<p>${message}</p>`;
             chatBox.appendChild(myMsg);
-
+            chatBox.scrollTop = chatBox.scrollHeight;
             input.value = '';
         });
     </script>
@@ -67,6 +70,7 @@
         background: #f6f1ff;
         border-radius: 10px;
         margin-bottom: 20px;
+        border: 1px solid #ccc;
     }
 
     .my-message {

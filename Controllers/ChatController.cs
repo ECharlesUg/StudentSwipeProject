@@ -1,63 +1,72 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenAI_API;
 using StudentSwipe.Models;
+using System.Security.Claims;
 
-[Authorize]
-public class ChatController : Controller
+namespace StudentSwipe.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public ChatController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    [Authorize]
+    public class ChatController : Controller
     {
-        _context = context;
-        _userManager = userManager;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly OpenAIAPI _openAI;
 
-    public async Task<IActionResult> StartChat(string receiverId, string context)
-    {
-        var sender = await _userManager.GetUserAsync(User);
-        var receiver = await _context.Users.FirstOrDefaultAsync(u => u.Id == receiverId);
-
-        if (sender == null || receiver == null) return NotFound();
-
-        // Prevent cross-type chats
-        var senderProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == sender.Id);
-        var receiverProfile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == receiver.Id);
-
-        if (context == "Roommate" && (senderProfile.UserType != "University" || receiverProfile.UserType != "University"))
-            return Forbid();
-
-        ViewBag.Receiver = receiver;
-        ViewBag.Context = context;
-
-        var messages = await _context.ChatMessages
-            .Where(m =>
-                ((m.SenderId == sender.Id && m.ReceiverId == receiverId) ||
-                (m.SenderId == receiverId && m.ReceiverId == sender.Id)) &&
-                m.Context == context)
-            .OrderBy(m => m.Timestamp)
-            .ToListAsync();
-
-        return View("Chat", messages);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> SendMessage(string receiverId, string message, string context)
-    {
-        var sender = await _userManager.GetUserAsync(User);
-        var chatMessage = new ChatMessage
+        public ChatController(ApplicationDbContext context, OpenAIAPI openAI)
         {
-            SenderId = sender.Id,
-            ReceiverId = receiverId,
-            Message = message,
-            Context = context
-        };
-        _context.ChatMessages.Add(chatMessage);
-        await _context.SaveChangesAsync();
+            _context = context;
+            _openAI = openAI;
+        }
 
-        return Ok();
+        [HttpGet]
+        public async Task<IActionResult> StartChat(string receiverId, string context)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null || receiverId == null) return Unauthorized();
+
+            var messages = await _context.ChatMessages
+                .Where(m =>
+                    (m.SenderId == currentUserId && m.ReceiverId == receiverId) ||
+                    (m.SenderId == receiverId && m.ReceiverId == currentUserId))
+                .OrderBy(m => m.Timestamp)
+                .ToListAsync();
+
+            ViewBag.Receiver = await _context.Users.FindAsync(receiverId);
+            ViewBag.Context = context;
+            return View("Chat", messages);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendMessage(string receiverId, string message, string context)
+        {
+            var senderId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId)) return BadRequest();
+
+            // OpenAI moderation
+            
+            var result = await _openAI.Moderation.CallModerationAsync(message);
+            var isFlagged = result.Results.FirstOrDefault()?.Flagged ?? false;
+
+            if (isFlagged)
+            {
+                return BadRequest("Message was flagged by OpenAI moderation.");
+            }
+
+
+            var msg = new ChatMessage
+            {
+                SenderId = senderId,
+                ReceiverId = receiverId,
+                Message = message,
+                Context = context,
+                Timestamp = DateTime.UtcNow
+            };
+
+            _context.ChatMessages.Add(msg);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }

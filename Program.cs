@@ -1,88 +1,77 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using OpenAI_API;
 using StudentSwipe.Helpers;
 using StudentSwipe.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container  
+// Add services
 builder.Services.AddControllersWithViews();
 
-// Add database context  
+// DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity  
+// Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedEmail = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>();
+}).AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
-// Bind EmailSettings from appsettings.json
+// Email config
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
-// Register SmtpEmailSender with injected settings
 builder.Services.AddTransient<IEmailSender>(sp =>
 {
-    var emailSettings = sp.GetRequiredService<IOptions<EmailSettings>>().Value;
-    return new SmtpEmailSender(
-        emailSettings.Host,
-        emailSettings.Port,
-        emailSettings.Username,
-        emailSettings.Password,
-        emailSettings.FromEmail
-    );
+    var settings = sp.GetRequiredService<IOptions<EmailSettings>>().Value;
+    return new SmtpEmailSender(settings.Host, settings.Port, settings.Username, settings.Password, settings.FromEmail);
 });
 
-
+// SignalR and OpenAI
 builder.Services.AddSignalR();
+builder.Services.AddSingleton(new OpenAIAPI(builder.Configuration["OpenAI:ApiKey"]));
 
 var app = builder.Build();
 
-
-app.MapHub<ChatHub>("/chathub");
-
-
-// Configure middleware  
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Routes
 app.MapControllerRoute(
-  name: "default",
-  pattern: "{controller=Home}/{action=Login}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Login}/{id?}");
 
+app.MapHub<ChatHub>("/chathub");
+
+// Seed domains
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
 
-
-
-    if (!context.SchoolDomains.Any())
+    if (!db.SchoolDomains.Any())
     {
-        var domains = SchoolDomainSeeder.GetPredefinedDomains();
-        context.SchoolDomains.AddRange(domains);
-        context.SaveChanges();
+        var predefined = SchoolDomainSeeder.GetPredefinedDomains();
+        db.SchoolDomains.AddRange(predefined);
+        db.SaveChanges();
     }
 }
 

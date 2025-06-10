@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Mvc; // Add this namespace
+using Microsoft.AspNetCore.Mvc; 
 using Microsoft.AspNetCore.Mvc.RazorPages; // Add this namespace
-using StudentSwipe.Models; // Add the namespace where the 'Profile' class is defined
+using StudentSwipe.Models; 
 
 
-// Pages/RoomMatch/ProfileCreationRoomate.cshtml.cs
 public class ProfileCreationRoomateModel : PageModel
 {
     [BindProperty]
@@ -11,6 +10,6 @@ public class ProfileCreationRoomateModel : PageModel
 
     public void OnGet()
     {
-        Profile = new Profile(); // or load from database if editing
+        Profile = new Profile(); 
     }
 }

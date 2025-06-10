@@ -3,14 +3,14 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace StudentSwipe.Helpers
+namespace StudentSwipe.Helpers   
 {
     public class SmtpEmailSender : IEmailSender
     {
         private readonly string _smtpHost;
         private readonly int _smtpPort;
         private readonly string _smtpUser;
-        private readonly string _smtpPass;
+        private readonly string _smtpPass;       
         private readonly string _fromEmail;
 
         public SmtpEmailSender(string smtpHost, int smtpPort, string smtpUser, string smtpPass, string fromEmail)
